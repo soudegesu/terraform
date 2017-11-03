@@ -36,6 +36,26 @@ func TestPluginPath(t *testing.T) {
 	}
 }
 
+func TestInternalProviders(t *testing.T) {
+	m := Meta{}
+	internal := m.internalProviders()
+	tfProvider, err := internal["terraform"]()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	dataSources := tfProvider.DataSources()
+	found := false
+	for _, ds := range dataSources {
+		if ds.Name == "terraform_remote_state" {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("didn't find terraform_remote_state in internal \"terraform\" provider")
+	}
+}
+
 // mockProviderInstaller is a discovery.PluginInstaller implementation that
 // is a mock for discovery.ProviderInstaller.
 type mockProviderInstaller struct {
